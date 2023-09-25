@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/hotFeedFragment">
+    <fragment
+        android:id="@+id/hotFeedFragment"
+        android:name="com.sharath070.imguram.ui.fragments.HotFeedFragment"
+        android:label="fragment_hot_feed"
+        tools:layout="@layout/fragment_hot_feed" >
+        <action
+            android:id="@+id/action_hotFeedFragment_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/topFeedFragment"
+        android:name="com.sharath070.imguram.ui.fragments.TopFeedFragment"
+        android:label="fragment_top_feed"
+        tools:layout="@layout/fragment_top_feed" >
+        <action
+            android:id="@+id/action_topFeedFragment_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/savedFeedFragment"
+        android:name="com.sharath070.imguram.ui.fragments.SavedFeedFragment"
+        android:label="fragment_saved_feed"
+        tools:layout="@layout/fragment_saved_feed" />
+    <fragment
+        android:id="@+id/webViewFragment"
+        android:name="com.sharath070.imguram.ui.fragments.WebViewFragment"
+        android:label="fragment_web_view"
+        tools:layout="@layout/fragment_web_view" >
+        <argument android:name="post"
+            app:argType="com.sharath070.imguram.model.galleryTags.Data" />
+    </fragment>
+</navigation>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item
+        android:id="@+id/hotFeedFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Hot"
+        android:iconTint="@color/secondary"
+        android:icon="@drawable/ic_hot"/>
+    <item
+        android:id="@+id/topFeedFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Top"
+        android:iconTint="@color/secondary"
+        android:icon="@drawable/ic_top"/>
+    <item
+        android:id="@+id/savedFeedFragment"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:title="Saved"
+        android:iconTint="@color/secondary"
+        android:icon="@drawable/ic_saved"/>
+</menu>

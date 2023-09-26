@@ -1,4 +1,4 @@
-package com.sharath070.imguram
+package com.sharath070.postpulse
 
 import org.junit.Test
 

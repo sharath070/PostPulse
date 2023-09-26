@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.sharath070.imguram"
+    namespace = "com.sharath070.postpulse"
     compileSdk = 34
 
     defaultConfig {

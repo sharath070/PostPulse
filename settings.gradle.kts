@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Imguram"
+rootProject.name = "PostPulse"
 include(":app")

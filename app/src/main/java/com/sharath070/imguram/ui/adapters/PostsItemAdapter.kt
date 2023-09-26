@@ -2,6 +2,7 @@ package com.sharath070.imguram.ui.adapters
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,9 +20,6 @@ import com.sharath070.imguram.model.galleryTags.Image
 
 class PostsItemAdapter(private val context: Context) :
     ListAdapter<Data, PostsItemAdapter.ViewHolder>(GalleryDiffUtil()) {
-
-    private var click = 0
-
 
     inner class ViewHolder(val itemBinding: ItemImageCardBinding) :
         RecyclerView.ViewHolder(itemBinding.root)
@@ -50,7 +48,10 @@ class PostsItemAdapter(private val context: Context) :
             tvCaption.text = caption
             holder.itemBinding.ivId.text = userName
 
-            val viewPagerAdapter = ViewPagerAdapter(context, imagesList)
+            val viewPagerAdapter = ViewPagerAdapter(context, imagesList) { position, post ->
+                onPostClickListener?.invoke(position, post)
+            }
+
             imgLayout.viewPager.adapter = viewPagerAdapter
             imgLayout.viewPager.orientation = ViewPager2.ORIENTATION_HORIZONTAL
             if (imagesList.size == 1) {
@@ -58,38 +59,10 @@ class PostsItemAdapter(private val context: Context) :
             }
             imgLayout.circleIndicator.setViewPager(imgLayout.viewPager)
 
-            clickListenerForImgLayout(holder, position)
 
-            holder.itemBinding.imgLayout.ibPlayerAction.setOnClickListener {
-                if (click++ % 2 == 0){
-                    holder.itemBinding.imgLayout.ibPlayerAction.setImageResource(R.drawable.ic_mute)
-
-                }
-                else{
-                    holder.itemBinding.imgLayout.ibPlayerAction.setImageResource(R.drawable.ic_volume)
-                }
-            }
         }
     }
 
-    private fun clickListenerForImgLayout(holder: ViewHolder, position: Int) {
-
-
-
-    }
-
-    private fun showImgItemCLick(position: Int, holder: ViewHolder) {
-
-        val post = getItem(position)
-
-        val viewPagerPosition = holder.itemBinding.imgLayout.viewPager.currentItem
-        val currentImage = post.images?.get(viewPagerPosition)
-        onPostClickListener?.let { image ->
-            if (currentImage != null) {
-                image(currentImage)
-            }
-        }
-    }
 
     class GalleryDiffUtil : DiffUtil.ItemCallback<Data>() {
         override fun areItemsTheSame(
@@ -106,17 +79,16 @@ class PostsItemAdapter(private val context: Context) :
 
     }
 
-    private var onPostClickListener: ((Image) -> Unit)? = null
-    fun setOnPostClickListener(listener: (Image) -> Unit) {
-        onPostClickListener = listener
-    }
 
     private var onItemClickListener: ((Data) -> Unit)? = null
     fun setOnItemClickListener(listener: (Data) -> Unit) {
         onItemClickListener = listener
     }
 
-
+    private var onPostClickListener: ((position: Int, data: List<Image>) -> Unit)? = null
+    fun setOnPostClickListener(listener: (position: Int, data: List<Image>) -> Unit) {
+        onPostClickListener = listener
+    }
 
     private fun showPopupMenu(view: View, data: Data) {
         val popupMenu = PopupMenu(context, view)

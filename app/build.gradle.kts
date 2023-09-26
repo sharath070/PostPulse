@@ -90,10 +90,7 @@ dependencies {
 
     implementation("me.relex:circleindicator:2.1.6")
 
-    implementation("com.google.android.exoplayer:exoplayer:2.19.1")
-    implementation("com.google.android.exoplayer:exoplayer-core:2.19.1")
-    implementation("androidx.media3:media3-exoplayer:1.1.1")
-    implementation("androidx.media3:media3-exoplayer-dash:1.1.1")
-    implementation("androidx.media3:media3-ui:1.1.1")
+    implementation("com.jsibbold:zoomage:1.3.1")
+
 
 }

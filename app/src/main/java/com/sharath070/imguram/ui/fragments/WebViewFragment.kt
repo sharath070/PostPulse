@@ -27,13 +27,11 @@ class WebViewFragment : Fragment() {
         return binding.root
     }
 
-    private lateinit var viewModel: PostsViewModel
     private val args: WebViewFragmentArgs by navArgs()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        viewModel = (activity as MainActivity).viewModel
 
         val posts = args.post
 

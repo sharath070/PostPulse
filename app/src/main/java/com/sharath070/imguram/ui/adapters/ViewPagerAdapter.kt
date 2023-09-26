@@ -6,20 +6,32 @@ import android.net.Uri
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.MutableLiveData
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.sharath070.imguram.R
 import com.sharath070.imguram.databinding.ImageViewRecyclerItemBinding
-import com.sharath070.imguram.model.galleryTags.Data
 import com.sharath070.imguram.model.galleryTags.Image
 
-class ViewPagerAdapter(private val context: Context, private val imgList: List<Image>) :
-    RecyclerView.Adapter<ViewPagerAdapter.ViewPagerViewHolder>() {
+class ViewPagerAdapter(
+    private val context: Context, private val imgList: List<Image>,
+    private val postClickListener: ((imgPosition: Int, images: List<Image>) -> Unit)
+) : RecyclerView.Adapter<ViewPagerAdapter.ViewPagerViewHolder>() {
 
-    var click = 0
+
+    private var click = 0
 
     inner class ViewPagerViewHolder(val itemBinding: ImageViewRecyclerItemBinding) :
-        RecyclerView.ViewHolder(itemBinding.root)
+        RecyclerView.ViewHolder(itemBinding.root) {
+
+        init {
+            itemBinding.view.setOnClickListener {
+                postClickListener.invoke(adapterPosition, imgList)
+            }
+        }
+
+    }
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewPagerViewHolder {
         val binding =
@@ -56,23 +68,22 @@ class ViewPagerAdapter(private val context: Context, private val imgList: List<I
             holder.itemBinding.vvPost.setOnPreparedListener { mediaPlayer ->
                 mediaPlayer.start()
                 mediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
+                mediaPlayer.setVolume(0f, 0f)
+                holder.itemBinding.ibPlayerAction.setImageResource(R.drawable.ic_mute)
+
+                holder.itemBinding.ibPlayerAction.setOnClickListener {
+                    if (click++ % 2 == 1) {
+                        holder.itemBinding.ibPlayerAction.setImageResource(R.drawable.ic_mute)
+                        mediaPlayer.setVolume(0f, 0f)
+                    } else {
+                        holder.itemBinding.ibPlayerAction.setImageResource(R.drawable.ic_volume)
+                        mediaPlayer.setVolume(1f, 1f)
+                    }
+                }
             }
-
-
-
-            holder.itemBinding.root.setOnClickListener {
-                val image = imgList[position]
-                onItemClickListener?.let { it(image) }
-            }
-
         }
 
-    }
 
-    private var onItemClickListener: ((Image) -> Unit)? = null
-    fun setOnItemClickListener(listener: (Image) -> Unit) {
-        onItemClickListener = listener
     }
-
 
 }

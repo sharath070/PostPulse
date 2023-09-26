@@ -26,7 +26,12 @@
         android:id="@+id/savedFeedFragment"
         android:name="com.sharath070.imguram.ui.fragments.SavedFeedFragment"
         android:label="fragment_saved_feed"
-        tools:layout="@layout/fragment_saved_feed" />
+        tools:layout="@layout/fragment_saved_feed" >
+        <action
+            android:id="@+id/action_savedFeedFragment_to_webViewFragment"
+            app:destination="@id/webViewFragment" />
+
+    </fragment>
     <fragment
         android:id="@+id/webViewFragment"
         android:name="com.sharath070.imguram.ui.fragments.WebViewFragment"

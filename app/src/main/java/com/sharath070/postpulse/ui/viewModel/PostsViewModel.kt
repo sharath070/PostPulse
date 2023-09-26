@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.sharath070.postpulse.model.galleryTags.Data
 import com.sharath070.postpulse.model.galleryTags.GalleryTagsResponse
 import com.sharath070.postpulse.repository.PostsRepository
 import com.sharath070.postpulse.repository.Resource
@@ -30,20 +31,35 @@ class PostsViewModel(private val context: Context, private val postsRepository: 
     private val _hotPosts: MutableLiveData<Resource<GalleryTagsResponse>> = MutableLiveData()
     val hotPosts: LiveData<Resource<GalleryTagsResponse>> get() = _hotPosts
 
+    private val _topPosts: MutableLiveData<Resource<GalleryTagsResponse>> = MutableLiveData()
+    val topPosts: LiveData<Resource<GalleryTagsResponse>> get() = _topPosts
+
+
     private fun getHotPosts() = viewModelScope.launch(Dispatchers.IO) {
         _hotPosts.postValue(Resource.Loading())
         val response = postsRepository.getHotPosts()
         _hotPosts.postValue(handleHotPosts(response))
     }
 
-    private val _topPosts: MutableLiveData<Resource<GalleryTagsResponse>> = MutableLiveData()
-    val topPosts: LiveData<Resource<GalleryTagsResponse>> get() = _topPosts
 
     fun getTopPosts() = viewModelScope.launch(Dispatchers.IO) {
         _topPosts.postValue(Resource.Loading())
         val response = postsRepository.getTopPosts()
         _topPosts.postValue(handleTopPosts(response))
     }
+
+
+    fun savePost(post: Data) = viewModelScope.launch(Dispatchers.IO) {
+        postsRepository.upsert(post)
+    }
+
+    fun getSavedPosts() = postsRepository.getSavedNews()
+
+    fun deletePost(post: Data) = viewModelScope.launch(Dispatchers.IO) {
+        postsRepository.deleteArticle(post)
+    }
+
+
 
 
 

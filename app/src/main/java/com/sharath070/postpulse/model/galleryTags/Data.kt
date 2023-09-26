@@ -1,7 +1,10 @@
 package com.sharath070.postpulse.model.galleryTags
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import java.io.Serializable
 
+@Entity(tableName = "post_data")
 data class Data(
     val account_id: Int?,
     val account_url: String?,
@@ -16,7 +19,8 @@ data class Data(
     val downs: Int?,
     val favorite: Boolean?,
     val favorite_count: Int?,
-    val id: String?,
+    @PrimaryKey
+    val id: String,
     val images: List<Image>?,
     val images_count: Int?,
     val in_gallery: Boolean?,

@@ -9,6 +9,7 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.sharath070.postpulse.R
 import com.sharath070.postpulse.databinding.ActivityMainBinding
+import com.sharath070.postpulse.db.PostDatabase
 import com.sharath070.postpulse.repository.PostsRepository
 import com.sharath070.postpulse.ui.viewModel.PostsViewModel
 import com.sharath070.postpulse.ui.viewModel.PostsViewModelFactory
@@ -24,7 +25,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
-        val postsRepository = PostsRepository()
+        val postsRepository = PostsRepository(PostDatabase.getDatabase(this))
         val viewModelProviderFactory = PostsViewModelFactory(applicationContext, postsRepository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory)[PostsViewModel::class.java]
 

@@ -92,5 +92,7 @@ dependencies {
 
     implementation("com.jsibbold:zoomage:1.3.1")
 
+    implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
+
 
 }

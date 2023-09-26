@@ -67,23 +67,38 @@ class ViewPagerAdapter(
             holder.itemBinding.vvPost.setVideoURI(Uri.parse(link))
             holder.itemBinding.vvPost.setOnPreparedListener { mediaPlayer ->
                 mediaPlayer.start()
-                mediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
-                mediaPlayer.setVolume(0f, 0f)
-                holder.itemBinding.ibPlayerAction.setImageResource(R.drawable.ic_mute)
+                mediaPlayerAttributes(mediaPlayer, holder)
+            }
 
+            holder.itemBinding.vvPost.setOnCompletionListener { mediaPlayer ->
+                holder.itemBinding.ibPlayerAction.setImageResource(R.drawable.ic_replay)
                 holder.itemBinding.ibPlayerAction.setOnClickListener {
-                    if (click++ % 2 == 1) {
-                        holder.itemBinding.ibPlayerAction.setImageResource(R.drawable.ic_mute)
-                        mediaPlayer.setVolume(0f, 0f)
-                    } else {
-                        holder.itemBinding.ibPlayerAction.setImageResource(R.drawable.ic_volume)
-                        mediaPlayer.setVolume(1f, 1f)
-                    }
+                    holder.itemBinding.vvPost.seekTo(0)
+                    holder.itemBinding.vvPost.start()
+                    mediaPlayerAttributes(mediaPlayer, holder)
                 }
             }
         }
 
 
+    }
+
+    private fun mediaPlayerAttributes(
+        mediaPlayer: MediaPlayer,
+        holder: ViewPagerViewHolder
+    ) {
+        mediaPlayer.setVideoScalingMode(MediaPlayer.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING)
+        mediaPlayer.setVolume(0f, 0f)
+        holder.itemBinding.ibPlayerAction.setImageResource(R.drawable.ic_mute)
+        holder.itemBinding.ibPlayerAction.setOnClickListener {
+            if (click++ % 2 == 1) {
+                holder.itemBinding.ibPlayerAction.setImageResource(R.drawable.ic_mute)
+                mediaPlayer.setVolume(0f, 0f)
+            } else {
+                holder.itemBinding.ibPlayerAction.setImageResource(R.drawable.ic_volume)
+                mediaPlayer.setVolume(1f, 1f)
+            }
+        }
     }
 
 }

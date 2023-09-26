@@ -84,7 +84,7 @@ class HotFeedFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        postsItemAdapter = PostsItemAdapter(requireContext())
+        postsItemAdapter = PostsItemAdapter(requireContext(), viewModel)
         binding.rvPosts.apply {
             adapter = postsItemAdapter
             layoutManager = LinearLayoutManager(activity)

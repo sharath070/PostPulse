@@ -44,12 +44,6 @@ class TopFeedFragment : Fragment() {
 
         setupRecyclerView()
 
-        /*postsItemAdapter.setOnItemClickListener {
-            Log.i("@@@@", it.images?.firstOrNull()?.description.toString())
-
-            val args = WebViewFragmentArgs(it)
-            findNavController().navigate(R.id.action_topFeedFragment_to_webViewFragment, args.toBundle())
-        }*/
 
         viewModel.topPosts.observe(viewLifecycleOwner) { response ->
 
@@ -71,14 +65,6 @@ class TopFeedFragment : Fragment() {
             }
         }
 
-    }
-
-    private fun setupRecyclerView() {
-        postsItemAdapter = PostsItemAdapter(requireContext())
-        binding.rvTopPosts.apply {
-            adapter = postsItemAdapter
-            layoutManager = LinearLayoutManager(activity)
-        }
 
         postsItemAdapter.setOnPostClickListener { position, post ->
             val post = PostAndPosition(position, post)
@@ -91,10 +77,19 @@ class TopFeedFragment : Fragment() {
 
         postsItemAdapter.setOnItemClickListener {
             val args = WebViewFragmentArgs(it)
-            findNavController().navigate(R.id.action_hotFeedFragment_to_webViewFragment, args.toBundle())
+            findNavController().navigate(R.id.action_topFeedFragment_to_webViewFragment, args.toBundle())
         }
 
 
+
+    }
+
+    private fun setupRecyclerView() {
+        postsItemAdapter = PostsItemAdapter(requireContext(), viewModel)
+        binding.rvTopPosts.apply {
+            adapter = postsItemAdapter
+            layoutManager = LinearLayoutManager(activity)
+        }
     }
 
     override fun onResume() {

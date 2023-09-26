@@ -15,8 +15,9 @@ import com.sharath070.postpulse.R
 import com.sharath070.postpulse.databinding.ItemImageCardBinding
 import com.sharath070.postpulse.model.galleryTags.Data
 import com.sharath070.postpulse.model.galleryTags.Image
+import com.sharath070.postpulse.ui.viewModel.PostsViewModel
 
-class PostsItemAdapter(private val context: Context) :
+class PostsItemAdapter(private val context: Context, private val viewModel: PostsViewModel) :
     ListAdapter<Data, PostsItemAdapter.ViewHolder>(GalleryDiffUtil()) {
 
     inner class ViewHolder(val itemBinding: ItemImageCardBinding) :
@@ -32,13 +33,13 @@ class PostsItemAdapter(private val context: Context) :
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val caption = getItem(position).images?.firstOrNull()?.description ?: ""
         val userName = getItem(position).id ?: "/*ID-Hidden*/"
-        val data = getItem(position)
-        val imagesList = data.images ?: listOf()
+        val post = getItem(position)
+        val imagesList = post.images ?: listOf()
 
 
 
         holder.itemBinding.ibOption.setOnClickListener { view ->
-            showPopupMenu(view, data)
+            showPopupMenu(view, post)
         }
 
 
@@ -88,26 +89,39 @@ class PostsItemAdapter(private val context: Context) :
         onPostClickListener = listener
     }
 
-    private fun showPopupMenu(view: View, data: Data) {
+    private fun showPopupMenu(view: View, post: Data) {
         val popupMenu = PopupMenu(context, view)
         popupMenu.inflate(R.menu.item_image_menu_options)
 
         val saveMenuItem = popupMenu.menu.findItem(R.id.action_save)
-        saveMenuItem.title = if (data.isSaved) "Unsave" else "Save"
+        saveMenuItem.title = if (post.isSaved) "Unsave" else "Save"
 
         popupMenu.setOnMenuItemClickListener {
             when (it.itemId) {
                 R.id.action_save -> {
-                    data.isSaved = !data.isSaved
 
-                    Snackbar.make(view, "Post Saved Successfully.", Snackbar.LENGTH_SHORT).show()
+                    if (!post.isSaved){
+                        post.isSaved = true
+                        viewModel.savePost(post)
+                        Snackbar.make(view, "Post Saved Successfully.", Snackbar.LENGTH_SHORT).show()
+                    }
+                    else{
+                        post.isSaved = false
+                        viewModel.deletePost(post)
+                        Snackbar.make(view, "Successfully deleted article", Snackbar.LENGTH_LONG).apply {
+                            setAction("Undo") {
+                                viewModel.savePost(post)
+                            }
+                            show()
+                        }
+                    }
 
-                    saveMenuItem.title = if (data.isSaved) "Unsave" else "Save"
+                    saveMenuItem.title = if (post.isSaved) "Unsave" else "Save"
                     true
                 }
 
                 R.id.action_open -> {
-                    onItemClickListener?.let { it(data) }
+                    onItemClickListener?.let { it(post) }
                     true
                 }
 
@@ -116,7 +130,7 @@ class PostsItemAdapter(private val context: Context) :
                     intent.type = "text/plain"
                     intent.putExtra(
                         Intent.EXTRA_TEXT,
-                        "${data.link}\nI found this intesting post in Imgruram."
+                        "${post.link}\nI found this intesting post in Imgruram."
                     )
                     context.startActivity(intent)
                     true

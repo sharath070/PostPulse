@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.sharath070.postpulse.R
 import com.sharath070.postpulse.databinding.FragmentSavedFeedBinding
 import com.sharath070.postpulse.model.galleryTags.PostAndPosition
@@ -57,7 +58,15 @@ class SavedFeedFragment : Fragment() {
 
 
         viewModel.getSavedPosts().observe(viewLifecycleOwner){
-            postsItemAdapter.submitList(it)
+            val savedPost = it.reversed()
+            postsItemAdapter.submitList(savedPost)
+        }
+
+        val nav = activity?.findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        nav?.setOnItemReselectedListener { item ->
+            if (item.itemId == R.id.savedFeedFragment) {
+                binding.rvSavedPosts.smoothScrollToPosition(0)
+            }
         }
 
     }

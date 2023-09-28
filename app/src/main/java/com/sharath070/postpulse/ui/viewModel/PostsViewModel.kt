@@ -44,18 +44,22 @@ class PostsViewModel(private val context: Context, private val postsRepository: 
 
     fun getHotPosts() = viewModelScope.launch(Dispatchers.IO) {
         val showViral = filterHotPosts == "viral"
+        val mature = filterTopPosts == "viral"
+        val album_previews = filterTopPosts == "viral"
         Log.d("@@@@", "getHotPosts: $showViral")
         _hotPosts.postValue(Resource.Loading())
-        val response = postsRepository.getHotPosts(paginationHotPosts, showViral)
+        val response = postsRepository.getHotPosts(paginationHotPosts, showViral, mature, album_previews)
         _hotPosts.postValue(handleHotPosts(response))
     }
 
 
     fun getTopPosts() = viewModelScope.launch(Dispatchers.IO) {
         val showViral = filterTopPosts == "viral"
+        val mature = filterTopPosts == "viral"
+        val album_previews = filterTopPosts == "viral"
         Log.d("@@@@", "getTopPosts: $showViral")
         _topPosts.postValue(Resource.Loading())
-        val response = postsRepository.getTopPosts(paginationTopPosts, showViral)
+        val response = postsRepository.getTopPosts(paginationTopPosts, showViral, mature, album_previews)
         _topPosts.postValue(handleTopPosts(response))
     }
 

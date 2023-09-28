@@ -13,7 +13,9 @@ interface ApiInterface {
     @Headers("Cache-Control: max-age=60")
     suspend fun getHotPost(
         @Path("page") page: Int,
-        @Query("showViral") showViral: Boolean = false
+        @Query("showViral") showViral: Boolean,
+        @Query("mature") mature: Boolean,
+        @Query("album_previews") album_previews: Boolean
     ): Response<GalleryTagsResponse>
 
 
@@ -22,7 +24,9 @@ interface ApiInterface {
     @Headers("Cache-Control: max-age=60")
     suspend fun getTopPost(
         @Path("page") page: Int,
-        @Query("showViral") showViral: Boolean
+        @Query("showViral") showViral: Boolean,
+        @Query("mature") mature: Boolean,
+        @Query("album_previews") album_previews: Boolean
     ): Response<GalleryTagsResponse>
 
 }

@@ -17,6 +17,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.sharath070.postpulse.R
@@ -48,6 +49,8 @@ class TopFeedFragment : Fragment() {
     private lateinit var bottomSheetViewModel: BottomSheetDialogViewModel
 
     private lateinit var postsItemAdapter: PostsItemAdapter
+    private var refreshFromPagination = false
+    private var refreshFromSwipe = false
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -90,12 +93,14 @@ class TopFeedFragment : Fragment() {
         val nav = activity?.findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         nav?.setOnItemReselectedListener { item ->
             if (item.itemId == R.id.topFeedFragment) {
-                binding.rvTopPosts.smoothScrollToPosition(0)
+                binding.rvTopPosts.scrollToPosition(59)
             }
         }
 
         binding.swipeToRefresh.setOnRefreshListener {
-            callApiWhenRefreshing()
+            viewModel.getTopPosts()
+            findNavController().popBackStack()
+            findNavController().navigate(R.id.topFeedFragment)
             binding.swipeToRefresh.isRefreshing = false
         }
 
@@ -107,7 +112,7 @@ class TopFeedFragment : Fragment() {
 
             when (response) {
                 is Resource.Success -> {
-                     hideProgressBar()
+                    hideProgressBar()
                     response.data?.let {
                         postsItemAdapter.submitList(it.data)
                     }
@@ -118,7 +123,7 @@ class TopFeedFragment : Fragment() {
                 }
 
                 is Resource.Loading -> {
-                     showProgressBar()
+                    showProgressBar()
                 }
             }
         }
@@ -126,13 +131,23 @@ class TopFeedFragment : Fragment() {
 
 
     private fun showProgressBar() {
-        binding.progressBar.visibility = View.VISIBLE
-        binding.progressBar2.visibility = View.VISIBLE
+        if (refreshFromPagination){
+            binding.progressBar3.visibility = View.VISIBLE
+            refreshFromPagination = false
+        }
+        else if (refreshFromSwipe){
+            refreshFromSwipe = false
+        }
+        else{
+            binding.progressBar.visibility = View.VISIBLE
+            binding.progressBar2.visibility = View.VISIBLE
+        }
     }
 
     private fun hideProgressBar() {
         binding.progressBar.visibility = View.GONE
         binding.progressBar2.visibility = View.GONE
+        binding.progressBar3.visibility = View.GONE
     }
 
     private fun setupRecyclerView() {
@@ -140,29 +155,25 @@ class TopFeedFragment : Fragment() {
         binding.rvTopPosts.apply {
             adapter = postsItemAdapter
             layoutManager = LinearLayoutManager(activity)
+            addOnScrollListener(this@TopFeedFragment.scrollListener)
         }
     }
 
+    private var isLoading = false
 
-    private fun callApiWhenRefreshing() {
-        viewModel.topPosts.observe(viewLifecycleOwner) { response ->
-
-            when (response) {
-                is Resource.Success -> {
-                    response.data?.let {
-                        postsItemAdapter.submitList(it.data)
-                    }
-                }
-
-                is Resource.Error -> {
-                    Toast.makeText(requireContext(), "Error in Response", Toast.LENGTH_SHORT).show()
-                }
-
-                is Resource.Loading -> {
-                }
+    private val scrollListener = object : RecyclerView.OnScrollListener(){
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            if (!recyclerView.canScrollVertically(1) && !isLoading){
+                isLoading = true
+                viewModel.getTopPosts()
+                isLoading = false
+                recyclerView.requestLayout()
+                refreshFromPagination = true
             }
         }
     }
+
 
 
     override fun onResume() {
@@ -244,7 +255,7 @@ class TopFeedFragment : Fragment() {
 
             bottomSheetViewModel.topPostsViralSelected()
             postsItemAdapter.submitList(null)
-            viewModel.getHotPosts("viral")
+            viewModel.getTopPosts()
 
             findNavController().popBackStack()
             findNavController().navigate(R.id.topFeedFragment)
@@ -258,7 +269,7 @@ class TopFeedFragment : Fragment() {
 
             bottomSheetViewModel.topPostsRaisingSelected()
             postsItemAdapter.submitList(null)
-            viewModel.getHotPosts("top")
+            viewModel.getTopPosts()
             findNavController().popBackStack()
             findNavController().navigate(R.id.topFeedFragment)
             bottomSheetDialog.dismiss()

@@ -22,7 +22,7 @@ class PostsViewModel(private val context: Context, private val postsRepository: 
     init {
         networkManager.observeForever {
             if (it == true){
-                getHotPosts("viral")
+                getHotPosts()
             }
         }
     }
@@ -30,21 +30,26 @@ class PostsViewModel(private val context: Context, private val postsRepository: 
 
     private val _hotPosts: MutableLiveData<Resource<GalleryTagsResponse>> = MutableLiveData()
     val hotPosts: LiveData<Resource<GalleryTagsResponse>> get() = _hotPosts
+    private var paginationHotPosts = 1
+    private var hotPostsResponse: GalleryTagsResponse? = null
+    var filterHotPosts = "viral"
 
     private val _topPosts: MutableLiveData<Resource<GalleryTagsResponse>> = MutableLiveData()
     val topPosts: LiveData<Resource<GalleryTagsResponse>> get() = _topPosts
+    private var paginationTopPosts = 1
+    private var topPostsResponse: GalleryTagsResponse? = null
+    var filterTopPosts = "viral"
 
-
-    fun getHotPosts(filter: String) = viewModelScope.launch(Dispatchers.IO) {
+    fun getHotPosts() = viewModelScope.launch(Dispatchers.IO) {
         _hotPosts.postValue(Resource.Loading())
-        val response = postsRepository.getHotPosts(filter, 1)
+        val response = postsRepository.getHotPosts(filterHotPosts, paginationHotPosts)
         _hotPosts.postValue(handleHotPosts(response))
     }
 
 
     fun getTopPosts() = viewModelScope.launch(Dispatchers.IO) {
         _topPosts.postValue(Resource.Loading())
-        val response = postsRepository.getTopPosts("viral", 1)
+        val response = postsRepository.getTopPosts("viral", paginationTopPosts)
         _topPosts.postValue(handleTopPosts(response))
     }
 
@@ -65,14 +70,42 @@ class PostsViewModel(private val context: Context, private val postsRepository: 
 
     private fun handleHotPosts(response: Response<GalleryTagsResponse>) : Resource<GalleryTagsResponse>{
         if (response.isSuccessful && response.body() != null){
-            return Resource.Success(response.body())
+
+            response.body()?.let {galleryResponse ->
+                paginationHotPosts++
+                if (hotPostsResponse == null){
+                    hotPostsResponse = galleryResponse
+                }
+                else{
+                    val oldPosts = hotPostsResponse?.data
+                    val newPosts = galleryResponse.data
+                    if (newPosts != null) {
+                        oldPosts?.addAll(newPosts)
+                    }
+                }
+                return Resource.Success(hotPostsResponse ?: galleryResponse)
+            }
         }
         return Resource.Error(response.message())
     }
 
     private fun handleTopPosts(response: Response<GalleryTagsResponse>) : Resource<GalleryTagsResponse>{
         if (response.isSuccessful && response.body() != null){
-            return Resource.Success(response.body())
+
+            response.body()?.let {galleryResponse ->
+                paginationTopPosts++
+                if (topPostsResponse == null){
+                    topPostsResponse = galleryResponse
+                }
+                else{
+                    val oldPosts = topPostsResponse?.data
+                    val newPosts = galleryResponse.data
+                    if (newPosts != null) {
+                        oldPosts?.addAll(newPosts)
+                    }
+                }
+                return Resource.Success(topPostsResponse ?: galleryResponse)
+            }
         }
         return Resource.Error(response.message())
     }

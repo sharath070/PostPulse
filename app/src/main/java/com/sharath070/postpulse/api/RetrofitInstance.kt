@@ -14,7 +14,7 @@ object RetrofitInstance {
 
     private val okHttpClient by lazy {
         OkHttpClient.Builder()
-            .connectionPool(ConnectionPool(5, 30, TimeUnit.SECONDS))
+            .connectionPool(ConnectionPool(5, 5, TimeUnit.SECONDS))
             .addInterceptor {
                 val request = it.request().newBuilder()
                     .addHeader("Authorization", "Client-ID $CLIENT_ID")

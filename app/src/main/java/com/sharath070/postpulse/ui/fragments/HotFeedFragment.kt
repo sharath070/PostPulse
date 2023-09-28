@@ -6,16 +6,21 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AbsListView
+import android.widget.Filter
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.content.ContextCompat
+import androidx.core.view.marginBottom
+import androidx.core.view.marginTop
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.sharath070.postpulse.R
@@ -46,6 +51,9 @@ class HotFeedFragment : Fragment() {
 
     private lateinit var postsItemAdapter: PostsItemAdapter
 
+    private var refreshFromPagination = false
+    private var refreshFromSwipe = false
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -70,7 +78,7 @@ class HotFeedFragment : Fragment() {
         val nav = activity?.findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         nav?.setOnItemReselectedListener { item ->
             if (item.itemId == R.id.hotFeedFragment) {
-                binding.rvPosts.smoothScrollToPosition(0)
+                binding.rvPosts.scrollToPosition(250)
             }
         }
         postsItemAdapter.setOnPostClickListener { position, post ->
@@ -95,7 +103,11 @@ class HotFeedFragment : Fragment() {
         showFeed()
 
         binding.swipeToRefresh.setOnRefreshListener {
-            callApiWhenRefreshing()
+            viewModel.getHotPosts()
+            findNavController().popBackStack()
+            findNavController().navigate(R.id.hotFeedFragment)
+            refreshFromSwipe = true
+            showFeed()
             binding.swipeToRefresh.isRefreshing = false
         }
 
@@ -111,7 +123,6 @@ class HotFeedFragment : Fragment() {
                     response.data?.let {
                         postsItemAdapter.submitList(it.data)
                     }
-                    binding.rvPosts.scrollToPosition(0)
                 }
 
                 is Resource.Error -> {
@@ -126,13 +137,23 @@ class HotFeedFragment : Fragment() {
     }
 
     private fun showProgressBar() {
-        binding.progressBar.visibility = View.VISIBLE
-        binding.progressBar2.visibility = View.VISIBLE
+        if (refreshFromPagination){
+            binding.progressBar4.visibility = View.VISIBLE
+            refreshFromPagination = false
+        }
+        else if (refreshFromSwipe){
+            refreshFromSwipe = false
+        }
+        else{
+            binding.progressBar.visibility = View.VISIBLE
+            binding.progressBar2.visibility = View.VISIBLE
+        }
     }
 
     private fun hideProgressBar() {
         binding.progressBar.visibility = View.GONE
         binding.progressBar2.visibility = View.GONE
+        binding.progressBar4.visibility = View.GONE
     }
 
     private fun setupRecyclerView() {
@@ -140,29 +161,26 @@ class HotFeedFragment : Fragment() {
         binding.rvPosts.apply {
             adapter = postsItemAdapter
             layoutManager = LinearLayoutManager(activity)
+            addOnScrollListener(this@HotFeedFragment.scrollListener)
         }
 
     }
 
-    private fun callApiWhenRefreshing() {
-        viewModel.hotPosts.observe(viewLifecycleOwner) { response ->
+    private var isLoading = false
 
-            when (response) {
-                is Resource.Success -> {
-                    response.data?.let {
-                        postsItemAdapter.submitList(it.data)
-                    }
-                }
-
-                is Resource.Error -> {
-                    Toast.makeText(requireContext(), "Error in Response", Toast.LENGTH_SHORT).show()
-                }
-
-                is Resource.Loading -> {
-                }
+    private val scrollListener = object : RecyclerView.OnScrollListener(){
+        override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+            super.onScrolled(recyclerView, dx, dy)
+            if (!recyclerView.canScrollVertically(1) && !isLoading){
+                isLoading = true
+                viewModel.getHotPosts()
+                isLoading = false
+                recyclerView.requestLayout()
+                refreshFromPagination = true
             }
         }
     }
+
 
     private fun showBottomSheet() {
         val bottomSheetDialog = BottomSheetDialog(requireContext())
@@ -178,6 +196,7 @@ class HotFeedFragment : Fragment() {
         val raisingTick = bottomSheetDialog.findViewById<ImageView>(R.id.ivRaisingTick)
 
         bottomSheetViewModel.selectedFilterForHotPosts.observe(viewLifecycleOwner) { filter ->
+            viewModel.filterHotPosts = filter
             when (filter) {
                 "viral" -> {
                     viralTick?.visibility = View.VISIBLE
@@ -232,12 +251,8 @@ class HotFeedFragment : Fragment() {
         showViral?.setOnClickListener {
 
             bottomSheetViewModel.hotPostsViralSelected()
-            postsItemAdapter.submitList(null)
-            viewModel.getHotPosts("viral")
-
+            viewModel.getHotPosts()
             findNavController().popBackStack()
-
-            // Navigate to the same fragment again
             findNavController().navigate(R.id.hotFeedFragment)
 
             bottomSheetDialog.dismiss()
@@ -249,8 +264,7 @@ class HotFeedFragment : Fragment() {
         showRaising?.setOnClickListener {
 
             bottomSheetViewModel.hotPostsRaisingSelected()
-            postsItemAdapter.submitList(null)
-            viewModel.getHotPosts("top")
+            viewModel.getHotPosts()
             findNavController().popBackStack()
             findNavController().navigate(R.id.hotFeedFragment)
             bottomSheetDialog.dismiss()

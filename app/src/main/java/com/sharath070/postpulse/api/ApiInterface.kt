@@ -9,24 +9,22 @@ import retrofit2.http.Query
 
 interface ApiInterface {
 
-    @GET("gallery/hot/{page}")
+    @GET("gallery/hot/{sort}/{page}")
     @Headers("Cache-Control: max-age=60")
     suspend fun getHotPost(
+        @Path("sort") sort: String,
         @Path("page") page: Int,
-        @Query("showViral") showViral: Boolean,
-        @Query("mature") mature: Boolean,
-        @Query("album_previews") album_previews: Boolean
+        @Query("showViral") showViral: Boolean = false
     ): Response<GalleryTagsResponse>
 
 
 
-    @GET("gallery/top/{page}")
+    @GET("gallery/top/{sort}/{page}")
     @Headers("Cache-Control: max-age=60")
     suspend fun getTopPost(
+        @Path("sort") sort: String,
         @Path("page") page: Int,
-        @Query("showViral") showViral: Boolean,
-        @Query("mature") mature: Boolean,
-        @Query("album_previews") album_previews: Boolean
+        @Query("showViral") showViral: Boolean = false
     ): Response<GalleryTagsResponse>
 
 }

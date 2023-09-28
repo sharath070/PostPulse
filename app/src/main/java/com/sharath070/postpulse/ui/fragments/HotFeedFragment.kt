@@ -195,7 +195,7 @@ class HotFeedFragment : Fragment() {
         val raisingTick = bottomSheetDialog.findViewById<ImageView>(R.id.ivRaisingTick)
 
         bottomSheetViewModel.selectedFilterForHotPosts.observe(viewLifecycleOwner) { filter ->
-            viewModel.filterHotPosts = filter
+            viewModel.filterHotPosts = filter.lowercase()
             when (filter) {
                 "viral" -> {
                     viralTick?.visibility = View.VISIBLE

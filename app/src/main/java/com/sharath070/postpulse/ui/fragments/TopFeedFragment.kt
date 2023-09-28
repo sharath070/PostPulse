@@ -193,7 +193,7 @@ class TopFeedFragment : Fragment() {
         val raisingTick = bottomSheetDialog.findViewById<ImageView>(R.id.ivRaisingTick)
 
         bottomSheetViewModel.selectedFilterForTopPosts.observe(viewLifecycleOwner) { filter ->
-            viewModel.filterTopPosts = filter
+            viewModel.filterTopPosts = filter.lowercase()
             when (filter) {
                 "viral" -> {
                     viralTick?.visibility = View.VISIBLE

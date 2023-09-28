@@ -1,6 +1,7 @@
 package com.sharath070.postpulse.ui.fragments
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -8,8 +9,12 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.TextView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomnavigation.BottomNavigationView
@@ -21,6 +26,7 @@ import com.sharath070.postpulse.repository.Resource
 import com.sharath070.postpulse.ui.activities.MainActivity
 import com.sharath070.postpulse.ui.activities.MediaViewActivity
 import com.sharath070.postpulse.ui.adapters.PostsItemAdapter
+import com.sharath070.postpulse.ui.viewModel.BottomSheetDialogViewModel
 import com.sharath070.postpulse.ui.viewModel.PostsViewModel
 
 
@@ -39,12 +45,15 @@ class TopFeedFragment : Fragment() {
 
 
     private lateinit var viewModel: PostsViewModel
+    private lateinit var bottomSheetViewModel: BottomSheetDialogViewModel
+
     private lateinit var postsItemAdapter: PostsItemAdapter
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         viewModel = (activity as MainActivity).viewModel
+        bottomSheetViewModel = (activity as MainActivity).bottomSheetDialogViewModel
 
         binding.toolbar.inflateMenu(R.menu.toolbar_menu)
 
@@ -61,26 +70,7 @@ class TopFeedFragment : Fragment() {
 
         setupRecyclerView()
 
-
-        viewModel.topPosts.observe(viewLifecycleOwner) { response ->
-
-            when (response) {
-                is Resource.Success -> {
-                    // hideProgressBar()
-                    response.data?.let {
-                        postsItemAdapter.submitList(it.data)
-                    }
-                }
-
-                is Resource.Error -> {
-                    Toast.makeText(requireContext(), "Error in Response", Toast.LENGTH_SHORT).show()
-                }
-
-                is Resource.Loading -> {
-                    // showProgressBar()
-                }
-            }
-        }
+        showFeed()
 
 
         postsItemAdapter.setOnPostClickListener { position, post ->
@@ -109,6 +99,40 @@ class TopFeedFragment : Fragment() {
             binding.swipeToRefresh.isRefreshing = false
         }
 
+    }
+
+
+    private fun showFeed() {
+        viewModel.topPosts.observe(viewLifecycleOwner) { response ->
+
+            when (response) {
+                is Resource.Success -> {
+                     hideProgressBar()
+                    response.data?.let {
+                        postsItemAdapter.submitList(it.data)
+                    }
+                }
+
+                is Resource.Error -> {
+                    Toast.makeText(requireContext(), "Error in Response", Toast.LENGTH_SHORT).show()
+                }
+
+                is Resource.Loading -> {
+                     showProgressBar()
+                }
+            }
+        }
+    }
+
+
+    private fun showProgressBar() {
+        binding.progressBar.visibility = View.VISIBLE
+        binding.progressBar2.visibility = View.VISIBLE
+    }
+
+    private fun hideProgressBar() {
+        binding.progressBar.visibility = View.GONE
+        binding.progressBar2.visibility = View.GONE
     }
 
     private fun setupRecyclerView() {
@@ -151,46 +175,93 @@ class TopFeedFragment : Fragment() {
         }
     }
 
-    private fun showBottomSheet(){
+    private fun showBottomSheet() {
         val bottomSheetDialog = BottomSheetDialog(requireContext())
         bottomSheetDialog.setContentView(R.layout.bottom_sheet_layout)
 
         val showViral = bottomSheetDialog.findViewById<LinearLayout>(R.id.llViral)
-        val showNew = bottomSheetDialog.findViewById<LinearLayout>(R.id.llNew)
         val showRaising = bottomSheetDialog.findViewById<LinearLayout>(R.id.llRaising)
 
+        val tvViral = bottomSheetDialog.findViewById<TextView>(R.id.tvViral)
+        val tvRaising = bottomSheetDialog.findViewById<TextView>(R.id.tvRaising)
+
         val viralTick = bottomSheetDialog.findViewById<ImageView>(R.id.ivViralTick)
-        val newTick = bottomSheetDialog.findViewById<ImageView>(R.id.ivNewTick)
         val raisingTick = bottomSheetDialog.findViewById<ImageView>(R.id.ivRaisingTick)
+
+        bottomSheetViewModel.selectedFilterForTopPosts.observe(viewLifecycleOwner) { filter ->
+            when (filter) {
+                "viral" -> {
+                    viralTick?.visibility = View.VISIBLE
+                    raisingTick?.visibility = View.INVISIBLE
+
+                    tvViral?.setTextColor(Color.WHITE)
+                    tvRaising?.setTextColor(
+                        ContextCompat.getColor(requireContext(), R.color.textDisabled)
+                    )
+
+                    val viralDrawable = tvViral?.compoundDrawables?.get(0)!!
+                    androidx.core.graphics.drawable.DrawableCompat.setTint(
+                        viralDrawable,
+                        Color.WHITE
+                    )
+
+                    val raisingDrawable = tvRaising?.compoundDrawables?.get(0)!!
+                    androidx.core.graphics.drawable.DrawableCompat.setTint(
+                        raisingDrawable,
+                        ContextCompat.getColor(requireContext(), R.color.textDisabled)
+                    )
+
+                }
+
+                "Raising" -> {
+                    viralTick?.visibility = View.INVISIBLE
+                    raisingTick?.visibility = View.VISIBLE
+
+                    tvRaising?.setTextColor(Color.WHITE)
+                    tvViral?.setTextColor(
+                        ContextCompat.getColor(
+                            requireContext(),
+                            R.color.textDisabled
+                        )
+                    )
+
+                    val raisingDrawable = tvRaising?.compoundDrawables?.get(0)!!
+                    androidx.core.graphics.drawable.DrawableCompat.setTint(
+                        raisingDrawable,
+                        Color.WHITE
+                    )
+
+                    val viralDrawable = tvViral?.compoundDrawables?.get(0)!!
+                    androidx.core.graphics.drawable.DrawableCompat.setTint(
+                        viralDrawable,
+                        ContextCompat.getColor(requireContext(), R.color.textDisabled)
+                    )
+                }
+            }
+        }
 
         showViral?.setOnClickListener {
 
+            bottomSheetViewModel.topPostsViralSelected()
+            postsItemAdapter.submitList(null)
+            viewModel.getHotPosts("viral")
 
-            viralTick?.visibility = View.VISIBLE
-            newTick?.visibility = View.INVISIBLE
-            raisingTick?.visibility = View.INVISIBLE
+            findNavController().popBackStack()
+            findNavController().navigate(R.id.topFeedFragment)
             bottomSheetDialog.dismiss()
 
         }
 
-        showNew?.setOnClickListener {
 
-
-            viralTick?.visibility = View.INVISIBLE
-            newTick?.visibility = View.VISIBLE
-            raisingTick?.visibility = View.INVISIBLE
-            bottomSheetDialog.dismiss()
-
-        }
 
         showRaising?.setOnClickListener {
 
-
-            viralTick?.visibility = View.INVISIBLE
-            newTick?.visibility = View.INVISIBLE
-            raisingTick?.visibility = View.VISIBLE
+            bottomSheetViewModel.topPostsRaisingSelected()
+            postsItemAdapter.submitList(null)
+            viewModel.getHotPosts("top")
+            findNavController().popBackStack()
+            findNavController().navigate(R.id.topFeedFragment)
             bottomSheetDialog.dismiss()
-
         }
 
         bottomSheetDialog.show()

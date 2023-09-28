@@ -6,15 +6,18 @@ import com.sharath070.postpulse.model.galleryTags.Data
 
 class PostsRepository(private val db: PostDatabase) {
 
-    suspend fun getHotPosts() = RetrofitInstance.api.getHotPost()
-    suspend fun getTopPosts() = RetrofitInstance.api.getTopPost()
+    suspend fun getHotPosts(sort: String, page: Int) =
+        RetrofitInstance.api.getHotPost(sort, page)
+
+    suspend fun getTopPosts(sort: String, page: Int) =
+        RetrofitInstance.api.getTopPost(sort, page)
 
 
-    suspend fun upsert(postData: Data) = db.getArticleDao().upsert(postData)
+    fun upsert(postData: Data) = db.getArticleDao().upsert(postData)
 
     fun getSavedNews() = db.getArticleDao().getAllPosts()
 
-    suspend fun deleteArticle(postData: Data) = db.getArticleDao().deleteArticle(postData)
+    fun deleteArticle(postData: Data) = db.getArticleDao().deleteArticle(postData)
 
 
 }

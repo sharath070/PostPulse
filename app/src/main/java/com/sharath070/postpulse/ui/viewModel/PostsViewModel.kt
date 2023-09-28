@@ -22,7 +22,7 @@ class PostsViewModel(private val context: Context, private val postsRepository: 
     init {
         networkManager.observeForever {
             if (it == true){
-                getHotPosts()
+                getHotPosts("viral")
             }
         }
     }
@@ -35,16 +35,16 @@ class PostsViewModel(private val context: Context, private val postsRepository: 
     val topPosts: LiveData<Resource<GalleryTagsResponse>> get() = _topPosts
 
 
-    private fun getHotPosts() = viewModelScope.launch(Dispatchers.IO) {
+    fun getHotPosts(filter: String) = viewModelScope.launch(Dispatchers.IO) {
         _hotPosts.postValue(Resource.Loading())
-        val response = postsRepository.getHotPosts()
+        val response = postsRepository.getHotPosts(filter, 1)
         _hotPosts.postValue(handleHotPosts(response))
     }
 
 
     fun getTopPosts() = viewModelScope.launch(Dispatchers.IO) {
         _topPosts.postValue(Resource.Loading())
-        val response = postsRepository.getTopPosts()
+        val response = postsRepository.getTopPosts("viral", 1)
         _topPosts.postValue(handleTopPosts(response))
     }
 

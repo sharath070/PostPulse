@@ -4,22 +4,27 @@ import com.sharath070.postpulse.model.galleryTags.GalleryTagsResponse
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Headers
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 interface ApiInterface {
 
-    @GET("gallery/hot")
+    @GET("gallery/hot/{sort}/{page}")
     @Headers("Cache-Control: max-age=60")
     suspend fun getHotPost(
-        @Query("showViral") showViral: Boolean = true,
-        @Query("album_previews") albumPreviews: Boolean = true
+        @Path("sort") sort: String,
+        @Path("page") page: Int,
+        @Query("showViral") showViral: Boolean = false
     ): Response<GalleryTagsResponse>
 
-    @GET("gallery/top")
+
+
+    @GET("gallery/top/{sort}/{page}")
     @Headers("Cache-Control: max-age=60")
     suspend fun getTopPost(
-        @Query("showViral") showViral: Boolean = true,
-        @Query("album_previews") albumPreviews: Boolean = true
+        @Path("sort") sort: String,
+        @Path("page") page: Int,
+        @Query("showViral") showViral: Boolean = false
     ): Response<GalleryTagsResponse>
 
 }

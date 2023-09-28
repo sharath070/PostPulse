@@ -1,6 +1,7 @@
 package com.sharath070.postpulse.ui.viewModel
 
 import android.content.Context
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -23,6 +24,7 @@ class PostsViewModel(private val context: Context, private val postsRepository: 
         networkManager.observeForever {
             if (it == true){
                 getHotPosts()
+                getTopPosts()
             }
         }
     }
@@ -41,15 +43,19 @@ class PostsViewModel(private val context: Context, private val postsRepository: 
     var filterTopPosts = "viral"
 
     fun getHotPosts() = viewModelScope.launch(Dispatchers.IO) {
+        val showViral = filterHotPosts == "viral"
+        Log.d("@@@@", "getHotPosts: $showViral")
         _hotPosts.postValue(Resource.Loading())
-        val response = postsRepository.getHotPosts(filterHotPosts, paginationHotPosts)
+        val response = postsRepository.getHotPosts(paginationHotPosts, showViral)
         _hotPosts.postValue(handleHotPosts(response))
     }
 
 
     fun getTopPosts() = viewModelScope.launch(Dispatchers.IO) {
+        val showViral = filterTopPosts == "viral"
+        Log.d("@@@@", "getTopPosts: $showViral")
         _topPosts.postValue(Resource.Loading())
-        val response = postsRepository.getTopPosts("viral", paginationTopPosts)
+        val response = postsRepository.getTopPosts(paginationTopPosts, showViral)
         _topPosts.postValue(handleTopPosts(response))
     }
 

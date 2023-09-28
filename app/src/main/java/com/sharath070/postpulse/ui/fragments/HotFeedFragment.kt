@@ -175,7 +175,6 @@ class HotFeedFragment : Fragment() {
                 isLoading = true
                 viewModel.getHotPosts()
                 isLoading = false
-                recyclerView.requestLayout()
                 refreshFromPagination = true
             }
         }

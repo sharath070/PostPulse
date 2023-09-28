@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.sharath070.postpulse.R
+import com.sharath070.postpulse.databinding.FragmentHotFeedBinding
 import com.sharath070.postpulse.databinding.FragmentTopFeedBinding
 import com.sharath070.postpulse.model.galleryTags.PostAndPosition
 import com.sharath070.postpulse.repository.Resource
@@ -33,7 +34,6 @@ import com.sharath070.postpulse.ui.viewModel.PostsViewModel
 
 class TopFeedFragment : Fragment() {
 
-
     private lateinit var binding: FragmentTopFeedBinding
 
     override fun onCreateView(
@@ -44,11 +44,11 @@ class TopFeedFragment : Fragment() {
         return binding.root
     }
 
-
     private lateinit var viewModel: PostsViewModel
     private lateinit var bottomSheetViewModel: BottomSheetDialogViewModel
 
     private lateinit var postsItemAdapter: PostsItemAdapter
+
     private var refreshFromPagination = false
     private var refreshFromSwipe = false
 
@@ -66,16 +66,19 @@ class TopFeedFragment : Fragment() {
                     showBottomSheet()
                     true
                 }
+
                 else -> false
             }
         }
 
-
         setupRecyclerView()
 
-        showFeed()
-
-
+        val nav = activity?.findViewById<BottomNavigationView>(R.id.bottomNavigationView)
+        nav?.setOnItemReselectedListener { item ->
+            if (item.itemId == R.id.topFeedFragment) {
+                binding.rvTopPosts.scrollToPosition(250)
+            }
+        }
         postsItemAdapter.setOnPostClickListener { position, post ->
             val post = PostAndPosition(position, post)
 
@@ -87,25 +90,27 @@ class TopFeedFragment : Fragment() {
 
         postsItemAdapter.setOnItemClickListener {
             val args = WebViewFragmentArgs(it)
-            findNavController().navigate(R.id.action_topFeedFragment_to_webViewFragment, args.toBundle())
+            findNavController().navigate(
+                R.id.action_topFeedFragment_to_webViewFragment,
+                args.toBundle()
+            )
         }
 
-        val nav = activity?.findViewById<BottomNavigationView>(R.id.bottomNavigationView)
-        nav?.setOnItemReselectedListener { item ->
-            if (item.itemId == R.id.topFeedFragment) {
-                binding.rvTopPosts.scrollToPosition(59)
-            }
-        }
+
+
+        showFeed()
 
         binding.swipeToRefresh.setOnRefreshListener {
             viewModel.getTopPosts()
             findNavController().popBackStack()
             findNavController().navigate(R.id.topFeedFragment)
+            refreshFromSwipe = true
+            showFeed()
             binding.swipeToRefresh.isRefreshing = false
         }
 
-    }
 
+    }
 
     private fun showFeed() {
         viewModel.topPosts.observe(viewLifecycleOwner) { response ->
@@ -128,7 +133,6 @@ class TopFeedFragment : Fragment() {
             }
         }
     }
-
 
     private fun showProgressBar() {
         if (refreshFromPagination){
@@ -157,6 +161,7 @@ class TopFeedFragment : Fragment() {
             layoutManager = LinearLayoutManager(activity)
             addOnScrollListener(this@TopFeedFragment.scrollListener)
         }
+
     }
 
     private var isLoading = false
@@ -168,23 +173,11 @@ class TopFeedFragment : Fragment() {
                 isLoading = true
                 viewModel.getTopPosts()
                 isLoading = false
-                recyclerView.requestLayout()
                 refreshFromPagination = true
             }
         }
     }
 
-
-
-    override fun onResume() {
-        super.onResume()
-
-        viewModel.networkManager.observe(viewLifecycleOwner){
-            if (it == true){
-                viewModel.getTopPosts()
-            }
-        }
-    }
 
     private fun showBottomSheet() {
         val bottomSheetDialog = BottomSheetDialog(requireContext())
@@ -200,6 +193,7 @@ class TopFeedFragment : Fragment() {
         val raisingTick = bottomSheetDialog.findViewById<ImageView>(R.id.ivRaisingTick)
 
         bottomSheetViewModel.selectedFilterForTopPosts.observe(viewLifecycleOwner) { filter ->
+            viewModel.filterTopPosts = filter
             when (filter) {
                 "viral" -> {
                     viralTick?.visibility = View.VISIBLE
@@ -254,11 +248,10 @@ class TopFeedFragment : Fragment() {
         showViral?.setOnClickListener {
 
             bottomSheetViewModel.topPostsViralSelected()
-            postsItemAdapter.submitList(null)
             viewModel.getTopPosts()
-
             findNavController().popBackStack()
             findNavController().navigate(R.id.topFeedFragment)
+
             bottomSheetDialog.dismiss()
 
         }
@@ -268,7 +261,6 @@ class TopFeedFragment : Fragment() {
         showRaising?.setOnClickListener {
 
             bottomSheetViewModel.topPostsRaisingSelected()
-            postsItemAdapter.submitList(null)
             viewModel.getTopPosts()
             findNavController().popBackStack()
             findNavController().navigate(R.id.topFeedFragment)

@@ -76,7 +76,7 @@ class TopFeedFragment : Fragment() {
         val nav = activity?.findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         nav?.setOnItemReselectedListener { item ->
             if (item.itemId == R.id.topFeedFragment) {
-                binding.rvTopPosts.scrollToPosition(250)
+                binding.rvTopPosts.smoothScrollToPosition(0)
             }
         }
         postsItemAdapter.setOnPostClickListener { position, post ->

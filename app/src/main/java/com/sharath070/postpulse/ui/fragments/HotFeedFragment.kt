@@ -78,7 +78,7 @@ class HotFeedFragment : Fragment() {
         val nav = activity?.findViewById<BottomNavigationView>(R.id.bottomNavigationView)
         nav?.setOnItemReselectedListener { item ->
             if (item.itemId == R.id.hotFeedFragment) {
-                binding.rvPosts.scrollToPosition(250)
+                binding.rvPosts.smoothScrollToPosition(0)
             }
         }
         postsItemAdapter.setOnPostClickListener { position, post ->

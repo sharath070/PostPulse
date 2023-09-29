@@ -13,7 +13,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:1.9.20-Beta2")
         val nav_version = "2.7.3"
         classpath("androidx.navigation:navigation-safe-args-gradle-plugin:$nav_version")
     }
